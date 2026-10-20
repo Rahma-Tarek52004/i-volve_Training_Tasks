@@ -1,0 +1,11 @@
+FROM eclipse-temurin:17-jre
+
+RUN useradd -m appuser
+WORKDIR /app
+RUN chown appuser:appuser /app
+USER appuser
+
+COPY --chown=appuser:appuser target/calculator.jar .
+
+EXPOSE 8080
+CMD ["java", "-jar", "calculator.jar"]
