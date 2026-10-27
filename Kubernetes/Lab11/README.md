@@ -40,7 +40,7 @@ kubectl describe quota ivolvequota -n ivolve
 ```
 Only `pod1`, `pod2` and `pod3` exist (`ContainerCreating` while the image was pulled), and the quota shows `pods  3  3`.
 
-![Namespace and ResourceQuota](screenshots/lab11-namespace-resourcequota.png)
+![Namespace and ResourceQuota](screenshots/namespace-resourcequota.png)
 
 ### 5. Cleanup
 ```bash
