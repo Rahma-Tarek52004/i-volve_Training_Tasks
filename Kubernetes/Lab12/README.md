@@ -50,7 +50,7 @@ kubectl get secret ivolvesecret -n ivolve -o jsonpath='{.data.DB_PASSWORD}' | ba
 - The Secret shows `Opaque` with `2` data items
 - Decoding `DB_PASSWORD` returns `AppPass123`
 
-![ConfigMap and Secret](screenshots/lab12-configmap-secret.png)
+![ConfigMap and Secret](screenshots/configmap-secret.png)
 
 ## Notes and issues
 - **Resource names:** the lab names are `ivolveCM` and `ivolveSecret`. Kubernetes names must be lowercase, so I used `ivolvecm` and `ivolvesecret`.
