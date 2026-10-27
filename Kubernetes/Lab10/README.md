@@ -36,7 +36,7 @@ kubectl get nodes --show-labels
 - `Taints: workload=ivolveApp:NoSchedule`
 - The `worker-1` labels include `project=ivolve`
 
-![Taint and label](screenshots/lab10-node-taint-label.png)
+![Taint and label](screenshots/node-taint-label.png)
 
 ### 5. Remove the taint (cleanup)
 ```bash
