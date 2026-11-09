@@ -1,0 +1,92 @@
+---
+- name: Lab 25 - Configure managed node (Docker, kubectl, Jenkins)
+  hosts: managed
+  become: true
+  vars:
+    kubectl_version: "v1.28.15"   # same as the cluster
+
+  tasks:
+    # ---------- Docker ----------
+    - name: Docker | check if Docker apt repo already exists
+      ansible.builtin.shell: grep -rqs "download.docker.com" /etc/apt/sources.list /etc/apt/sources.list.d/
+      register: docker_repo
+      changed_when: false
+      failed_when: false
+
+    - name: Docker | add repo only if missing
+      when: docker_repo.rc != 0
+      block:
+        - name: Docker | keyrings dir
+          ansible.builtin.file:
+            path: /etc/apt/keyrings
+            state: directory
+            mode: "0755"
+        - name: Docker | GPG key
+          ansible.builtin.get_url:
+            url: https://download.docker.com/linux/ubuntu/gpg
+            dest: /etc/apt/keyrings/docker.asc
+            mode: "0644"
+        - name: Docker | repository
+          ansible.builtin.apt_repository:
+            repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+            filename: docker
+            state: present
+
+    - name: Docker | install packages
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+        update_cache: true
+
+    - name: Docker | enable and start
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true
+
+    # ---------- kubectl ----------
+    - name: kubectl | download binary
+      ansible.builtin.get_url:
+        url: "https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/amd64/kubectl"
+        dest: /usr/local/bin/kubectl
+        mode: "0755"
+
+    # ---------- Jenkins ----------
+    - name: Jenkins | prerequisites (Java 21)
+      ansible.builtin.apt:
+        name: [fontconfig, openjdk-21-jre, ca-certificates, curl]
+        state: present
+
+    - name: Jenkins | GPG key
+      ansible.builtin.get_url:
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key
+        dest: /usr/share/keyrings/jenkins-keyring.asc
+        mode: "0644"
+
+    - name: Jenkins | repository
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/"
+        filename: jenkins
+        state: present
+
+    - name: Jenkins | install
+      ansible.builtin.apt:
+        name: jenkins
+        state: present
+        update_cache: true
+
+    - name: Jenkins | allow jenkins user to use docker
+      ansible.builtin.user:
+        name: jenkins
+        groups: docker
+        append: true
+
+    - name: Jenkins | enable and start
+      ansible.builtin.service:
+        name: jenkins
+        state: started
+        enabled: true

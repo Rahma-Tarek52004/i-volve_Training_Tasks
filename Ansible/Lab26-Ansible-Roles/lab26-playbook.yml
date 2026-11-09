@@ -1,0 +1,8 @@
+---
+- name: Lab 26 - Configure managed node using roles
+  hosts: managed
+  become: true
+  roles:
+    - docker
+    - kubectl
+    - jenkins

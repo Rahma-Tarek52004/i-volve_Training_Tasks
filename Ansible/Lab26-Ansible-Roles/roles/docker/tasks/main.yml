@@ -1,0 +1,37 @@
+---
+- name: Check if Docker apt repo already exists
+  ansible.builtin.shell: grep -rqs "download.docker.com" /etc/apt/sources.list /etc/apt/sources.list.d/
+  register: docker_repo
+  changed_when: false
+  failed_when: false
+
+- name: Add Docker repo only if missing
+  when: docker_repo.rc != 0
+  block:
+    - name: Keyrings dir
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: "0755"
+    - name: GPG key
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: "0644"
+    - name: Repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        filename: docker
+        state: present
+
+- name: Install Docker packages
+  ansible.builtin.apt:
+    name: "{{ docker_packages }}"
+    state: present
+    update_cache: true
+
+- name: Enable and start Docker
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true
