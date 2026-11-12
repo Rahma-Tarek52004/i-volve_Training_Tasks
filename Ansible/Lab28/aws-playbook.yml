@@ -1,0 +1,30 @@
+---
+- name: Configure AWS EC2 instance
+  hosts: tag_server_ivolve
+  become: true
+
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+
+    - name: Install Nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+
+    - name: Start and enable Nginx
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: true
+
+    - name: Create custom index page
+      ansible.builtin.copy:
+        content: |
+          <h1>Welcome to iVolve Lab 28</h1>
+          <p>Configured automatically using Ansible Dynamic Inventory.</p>
+        dest: /var/www/html/index.html
+        owner: root
+        group: root
+        mode: '0644'

@@ -1,0 +1,4 @@
+# Example of the file content BEFORE encryption (placeholder value only).
+# The real file is named vault.yml and is encrypted with:
+#   ansible-vault encrypt group_vars/managed/vault.yml
+vault_mysql_user_password: "CHANGE_ME"

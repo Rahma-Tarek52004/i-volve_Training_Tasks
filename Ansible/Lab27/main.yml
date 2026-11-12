@@ -1,0 +1,30 @@
+---
+- name: Install MySQL server and PyMySQL
+  apt:
+    name:
+      - mysql-server
+      - python3-pymysql
+    state: present
+    update_cache: true
+
+- name: Start and enable MySQL
+  service:
+    name: mysql
+    state: started
+    enabled: true
+
+- name: Create database
+  community.mysql.mysql_db:
+    name: "{{ mysql_db_name }}"
+    state: present
+    login_unix_socket: "{{ mysql_socket }}"
+
+- name: Create user with all privileges on the database
+  community.mysql.mysql_user:
+    name: "{{ mysql_user_name }}"
+    password: "{{ mysql_user_password }}"
+    priv: "{{ mysql_db_name }}.*:ALL"
+    host: localhost
+    state: present
+    login_unix_socket: "{{ mysql_socket }}"
+  no_log: true
